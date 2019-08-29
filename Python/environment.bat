@@ -13,5 +13,17 @@ rem activate it
 rem add tensor flow
 pip install --upgrade tensorflow==2.0.0-rc0
 
+rem screenshot library
+python -m pip install -U --user mss
+
+rem numpy
+pip install numpy
+
+rem open cv
+pip install opencv-python
+
+rem auto gui (send mouse and keyboard events)
+python -m pip install pyautogui
+
 rem show me what I got
 pip list
