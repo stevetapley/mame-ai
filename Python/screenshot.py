@@ -9,14 +9,13 @@ pyautogui.moveTo(3000, 500)
 pyautogui.click()
 pyautogui.typewrite("55555", 1)
 
-
 # screenshotting
 import time
 import cv2
 import mss
 import numpy
 with mss.mss() as sct:
-    # Screen cpa the board
+    # Screen cap the board
     monitor_number = 1
     mon = sct.monitors[monitor_number]
     monitor = {
