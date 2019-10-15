@@ -5,7 +5,9 @@ import numpy
 import cv2
 import imagehash
 from PIL import Image
-
+import ctypes
+import sendkeys
+import time, sys
 
 class States(Enum):
     WaitingForMameShellStartup = 1
@@ -16,14 +18,15 @@ class States(Enum):
 def InsertCoin():
     pyautogui.moveTo(3000, 500)
     pyautogui.click()
-    pyautogui.typewrite("5")
-
+    sendkeys.SendScanCodeInput(0x06)
 
 def StartGame():
     pyautogui.moveTo(3000, 500)
     pyautogui.click()
-    pyautogui.typewrite("1")
+    sendkeys.SendScanCodeInput(0x02)
 
+def SendKey(key):
+    ctypes.windll.user32
 
 def SampleScreen():
     with mss.mss() as sct:
@@ -111,7 +114,7 @@ def IsGameEnded(frame):
 def HasCredit(frame):
     # look for anything but zero in the first position
     creditcountframe = frame[969:997, 251:277]
-    cv2.imshow('creditcountarea', creditcountframe)
+    # cv2.imshow('creditcountarea', creditcountframe)
     credithash = str(imagehash.average_hash(Image.fromarray(creditcountframe)))
     if credithash == '0000000000000000':
         return False
@@ -123,7 +126,7 @@ def HasCredit(frame):
 
 def WaitingForStartup(frame):
     startupframe = frame[550:585, 278:440]
-    cv2.imshow('startupframe', startupframe)
+    # cv2.imshow('startupframe', startupframe)
     credithash = str(imagehash.average_hash(Image.fromarray(startupframe)))
     if credithash == '00ffdffebcf82000':
         return True
@@ -132,6 +135,7 @@ def WaitingForStartup(frame):
 
 
 # ******************* main loop *******************
+a = 1
 while True:
     frame = SampleScreen()
 
@@ -139,15 +143,15 @@ while True:
     print('Score = ' + str(scores))
     if IsGameEnded(frame):
         print('game ended')
+        InsertCoin()
+        if HasCredit(frame):
+            StartGame()
     else:
-        print('game started')
+        if not WaitingForStartup(frame):
+            if a == 1:
+                a = 0
+                sendkeys.SendScanCodeInput(0xCB)
+            else:
+                a = 1
+                sendkeys.SendScanCodeInput(0xCD)
 
-    if HasCredit(frame):
-        print('has credit')
-    if WaitingForStartup(frame):
-        print('waiting for startup')
-
-    # Press "q" to quit
-    if cv2.waitKey(25) & 0xFF == ord("q"):
-        cv2.destroyAllWindows()
-        break
