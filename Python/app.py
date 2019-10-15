@@ -96,13 +96,56 @@ def GetScore(frame):
 
     return value
 
+def IsGameEnded(frame):
+    # look for word 'credit' at bottom of screen
+    creditframe = frame[969:997, 35:198]
+    # cv2.imshow('creditarea', creditframe)
+    credithash = str(imagehash.average_hash(Image.fromarray(creditframe)))
+    if credithash == '12ffa8307860fe10':
+        return True
+
+    # look for word 'game' in middle of screen
+    # look for word 'over' in middle of screen
+    return False
+
+def HasCredit(frame):
+    # look for anything but zero in the first position
+    creditcountframe = frame[969:997, 251:277]
+    cv2.imshow('creditcountarea', creditcountframe)
+    credithash = str(imagehash.average_hash(Image.fromarray(creditcountframe)))
+    if credithash == '0000000000000000':
+        return False
+
+    if credithash == '383c46c7c7e63c18':
+        return False
+    
+    return True
+
+def WaitingForStartup(frame):
+    startupframe = frame[550:585, 278:440]
+    cv2.imshow('startupframe', startupframe)
+    credithash = str(imagehash.average_hash(Image.fromarray(startupframe)))
+    if credithash == '00ffdffebcf82000':
+        return True
+    
+    return False
+
 
 # ******************* main loop *******************
 while True:
     frame = SampleScreen()
 
     scores = GetScore(frame)
-    print(scores)
+    print('Score = ' + str(scores))
+    if IsGameEnded(frame):
+        print('game ended')
+    else:
+        print('game started')
+
+    if HasCredit(frame):
+        print('has credit')
+    if WaitingForStartup(frame):
+        print('waiting for startup')
 
     # Press "q" to quit
     if cv2.waitKey(25) & 0xFF == ord("q"):
