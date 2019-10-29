@@ -23,7 +23,11 @@ def CaptureImage():
 
         cv2.imshow('frame', lastCapturedImage)
 
+        
         return lastCapturedImage
     
 def GetLastImage():
     return lastCapturedImage
+
+def GetEdgeDetectedImage(daImage):
+    return cv2.Canny(daImage, threshold1 = 100, threshold2 = 200)

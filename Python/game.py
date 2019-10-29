@@ -1,9 +1,6 @@
 import pyautogui
 import sendkeys
 import ctypes
-import mss
-import numpy
-import cv2
 import imagehash
 from PIL import Image
 import image
@@ -22,30 +19,34 @@ class Game:
         sendkeys.SendScanCodeInput(0x02)
 
     def MoveUp(self):
-        # todo check!
-        sendkeys.SendScanCodeInput(0xCA)
+        print ("Move Up")
+        sendkeys.SendScanCodeInput(0xC8)
 
     def MoveDown(self):
-        # todo check!
-        sendkeys.SendScanCodeInput(0xCC)
+        print ("Move Down")
+        sendkeys.SendScanCodeInput(0xD0)
 
     def MoveLeft(self):
-        # todo check!
-        sendkeys.SendScanCodeInput(0xCD)
-
-    def MoveRight(self):
-        # todo check!
+        print ("Move Left")
         sendkeys.SendScanCodeInput(0xCB)
 
+    def MoveRight(self):
+        print ("Move Right")
+        sendkeys.SendScanCodeInput(0xCD)
+
     def Pause(self):
-        # todo check!
-        sendkeys.SendScanCodeInput(0xDD)
+        print ("Pausing Game!!!!")
+        sendkeys.SendScanCodeInput(0x19)
 
     def Resume(self):
-        # todo check!
-        sendkeys.SendScanCodeInput(0xDE)
+        print ("Resuming Game!!!!")
+        sendkeys.SendScanCodeInput(0x19)
+
+    def End(self):
+        ctypes.windll.user32.MessageBoxW(0, "Game ended!", "GAME ENDED!", 0)
 
     def GetScore(self):
+        print ("Attempting to Get Score...")
         DIGIT_WIDTH = 27
         DIGIT_TOP = 30
         DIGIT_BOTTOM = 54
@@ -95,22 +96,29 @@ class Game:
 
             multiplier = multiplier * 10
 
+        print ("Score = " + str(value))
         return value
 
     def HasCredit(self, frame):
+        print ("Determining If We Have Credit")
         # look for anything but zero in the first position
         creditcountframe = frame[969:997, 251:277]
         # cv2.imshow('creditcountarea', creditcountframe)
         credithash = str(imagehash.average_hash(Image.fromarray(creditcountframe)))
         if credithash == '0000000000000000':
+            print("We DONT have Credit :(")
             return False
 
         if credithash == '383c46c7c7e63c18':
+            print("We DONT have Credit :(")
             return False
 
+        print("We DO have Credit :)")
         return True
         
     def IsGameEnded(self, frame):
+        print ("Determining If The Game Has Ended")
+
         # look for word 'credit' at bottom of screen
         creditframe = frame[969:997, 35:198]
         # cv2.imshow('creditarea', creditframe)
@@ -123,6 +131,8 @@ class Game:
         return False
 
     def IsGameInitializing(self, frame):
+        print ("Determining If The Game Is Initialising")
+
         startupframe = frame[550:585, 278:440]
         # cv2.imshow('startupframe', startupframe)
         credithash = str(imagehash.average_hash(Image.fromarray(startupframe)))

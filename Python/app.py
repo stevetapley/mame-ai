@@ -3,25 +3,23 @@ from collections import deque
 
 # my modules
 import sendkeys
-import gamestate
-import model
-import train
+from model import buildModel
 from game import Game
 from agent import Agent
-from gamestate import GameState
+from train import Train
 #######################################
 
 def playGame(observe=False):
     game = Game()
     agent = Agent(game)
-    game_state = GameState(agent,game)
-    model = model.buildmodel()
-    try:
-        train.trainNetwork(model,game_state,observe=observe)
-    except StopIteration:
-        game.end()
+    tensorModel = buildModel()
+    train = Train(agent,game)
 
-train.Initialise()
+    try:
+        train.trainNetwork(tensorModel,observe=observe)
+    except StopIteration:
+        game.End()
+
 playGame(False)
 
 
