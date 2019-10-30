@@ -15,3 +15,9 @@ def LoadObject(name):
 
 def FileExists(name):
     return os.path.exists(RootFolder + 'objects/' + name + '.pkl')
+
+def GetImageFilePath(name):
+    return RootFolder + 'objects/' + name + '.png'
+
+def ImageFileExists(name):
+    return os.path.exists(RootFolder + 'objects/' + name + '.png')

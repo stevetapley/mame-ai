@@ -7,43 +7,40 @@ from model import buildModel
 from game import Game
 from agent import Agent
 from train import Train
+
 #######################################
 
 def playGame(observe=False):
+    tensorModel = buildModel()
     game = Game()
     agent = Agent(game)
-    tensorModel = buildModel()
-    train = Train(agent,game)
+    train = Train(agent, game)
 
     try:
-        train.trainNetwork(tensorModel,observe=observe)
+        train.trainNetwork(tensorModel, observe=observe)
     except StopIteration:
         game.End()
 
-playGame(False)
 
+# playGame(False)
 
+import time
+import image
+game = Game()
 
-# ******************* main loop *******************
-# a = 1
-# img_queue = deque()
-
-# while True:
-#     frame = gamestate.SampleScreen()
+while True:
+    image.CaptureImage()
+    game.IsGameEnded(image.GetLastImage())
+    game.HasCredit(image.GetLastImage())
+    time.sleep(0.3)
     
-#     gamestate.GetGameBoard(frame)
 
-#     scores = gamestate.GetScore(frame)
-#     print('Score = ' + str(scores))
-#     if gamestate.IsGameEnded(frame):
-#         print('game ended')
-#         gamestate.InsertCoin()
-#         if gamestate.HasCredit(frame):
-#             gamestate.StartGame()
-#     else:
-#         if not gamestate.WaitingForStartup(frame):
-
-#             # sample initial boards
-#             for x in range(model.IMG_CHANNELS)
-#                 img_queue.append(gamestate.GetGameBoard(frame))
-
+# debug code to get the image
+# import image
+# import model
+# import cv2
+# while True:
+#     image.CaptureImage()
+#     canny = image.GetEdgeDetectedImage(image.GetLastImage())
+#     boardframe = canny[100:model.IMAGE_ROWS, 0:model.IMAGE_COLS]
+#     cv2.imshow("gameboard", boardframe)

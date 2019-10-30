@@ -2,7 +2,10 @@ import tensorflow as tf
 
 # model hyper parameters
 LEARNING_RATE = 1e-4
-IMAGE_ROWS,IMAGE_COLS = 730,890
+IMAGE_ROWS_OFFSET = 100
+IMAGE_ROWS = 920
+IMAGE_COLS_OFFSET = 0
+IMAGE_COLS = 710
 IMG_CHANNELS = 4 #We stack 4 frames
 
 # game parameters
@@ -18,7 +21,7 @@ FRAME_PER_ACTION = 1
 
 def buildModel():
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Conv2D(32, (8, 8), strides=(4, 4), padding='same',input_shape=(IMAGE_COLS,IMAGE_ROWS,IMG_CHANNELS)))
+    model.add(tf.keras.layers.Conv2D(32, (8, 8), strides=(4, 4), padding='same',input_shape=(IMAGE_ROWS-IMAGE_ROWS_OFFSET,IMAGE_COLS-IMAGE_COLS_OFFSET,IMG_CHANNELS)))
     model.add(tf.keras.layers.Activation('relu'))
     model.add(tf.keras.layers.Conv2D(64, (4, 4), strides=(2, 2), padding='same'))
     model.add(tf.keras.layers.Activation('relu'))

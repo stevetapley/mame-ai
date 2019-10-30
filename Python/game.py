@@ -4,18 +4,24 @@ import ctypes
 import imagehash
 from PIL import Image
 import image
+import cv2
+import utilities
+import numpy as np
 
 class Game:
 
     def __init__(self):
         # moves to the second monitor and gives the MAME window focus
+        print ("Giving Focus to MAME")
         pyautogui.moveTo(3000, 500)
         pyautogui.click()
 
     def InsertCoin(self):
+        print ("Inserting Coin")
         sendkeys.SendScanCodeInput(0x06)
 
     def StartGame(self):
+        print (" Starting Game")
         sendkeys.SendScanCodeInput(0x02)
 
     def MoveUp(self):
@@ -91,8 +97,7 @@ class Game:
                 value += multiplier * hashes[digithash]
             else:
                 # cv2.imshow('ones', digitframe)
-                print("unexpected hash for digit: " +
-                    str(digit) + " = " + digithash)
+                print("unexpected hash for digit: " + str(digit) + " = " + digithash)
 
             multiplier = multiplier * 10
 
@@ -104,12 +109,8 @@ class Game:
         # look for anything but zero in the first position
         creditcountframe = frame[969:997, 251:277]
         # cv2.imshow('creditcountarea', creditcountframe)
-        credithash = str(imagehash.average_hash(Image.fromarray(creditcountframe)))
-        if credithash == '0000000000000000':
-            print("We DONT have Credit :(")
-            return False
 
-        if credithash == '383c46c7c7e63c18':
+        if image.IsImageMatch(creditcountframe, 'hasnocredit_template'):
             print("We DONT have Credit :(")
             return False
 
@@ -119,15 +120,15 @@ class Game:
     def IsGameEnded(self, frame):
         print ("Determining If The Game Has Ended")
 
-        # look for word 'credit' at bottom of screen
         creditframe = frame[969:997, 35:198]
-        # cv2.imshow('creditarea', creditframe)
-        credithash = str(imagehash.average_hash(Image.fromarray(creditframe)))
-        if credithash == '12ffa8307860fe10':
+        if image.IsImageMatch(creditframe, 'creditarea_template'):
+            print ("Game has ENDED")
             return True
 
         # look for word 'game' in middle of screen
         # look for word 'over' in middle of screen
+
+        print ("Game NOT Ended")
         return False
 
     def IsGameInitializing(self, frame):
@@ -137,7 +138,9 @@ class Game:
         # cv2.imshow('startupframe', startupframe)
         credithash = str(imagehash.average_hash(Image.fromarray(startupframe)))
         if credithash == '00ffdffebcf82000':
+            print("Game Initialising")
             return True
 
+        print("Game has Initialised")
         return False
 

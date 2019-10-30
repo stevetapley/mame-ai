@@ -66,6 +66,8 @@ class Train:
         elif actions[4] == 1:
             self._agent.MoveRight()
             reward = 0.1*score/11
+        else:
+            print ("Agent Doing Nothing")
 
         image = self.GetGameBoard()
 
@@ -79,7 +81,7 @@ class Train:
         return image, reward, is_over  # return the Experience tuple
 
     def GetGameBoard(self):
-        boardframe = image.GetEdgeDetectedImage(image.GetLastImage()[60:950, 0:730])
+        boardframe = image.GetLastImage()[model.IMAGE_ROWS_OFFSET:model.IMAGE_ROWS, model.IMAGE_COLS_OFFSET:model.IMAGE_COLS]
         boardframe = np.array(boardframe).astype(np.float16)
 
         # cv2.imshow('boardframe', boardframe)
@@ -126,7 +128,7 @@ class Train:
             loss = 0
             Q_sa = 0
             action_index = 0
-            r_t = 0  # reward at 4
+            new_reward = 0  # reward at 4
             a_t = np.zeros([model.ACTIONS])  # action at t
 
             # choose an action epsilon greedy
@@ -134,7 +136,7 @@ class Train:
                 if random.random() <= epsilon:  # randomly explore an action
                     print("----------Random Action----------")
                     action_index = random.randrange(model.ACTIONS)
-                    a_t[0] = 1
+                    a_t[action_index] = 1
                 else:  # predict the output
                     # input a stack of 4 images, get the prediction
                     q = tensorModel.predict(s_t)
@@ -148,16 +150,16 @@ class Train:
                 epsilon -= (model.INITIAL_EPSILON - model.FINAL_EPSILON) / model.EXPLORE
 
             # run the selected action and observed next state and reward
-            x_t1, r_t, isGameOver = self.GetGameState(a_t)
+            new_gameImage, new_reward, isGameOver = self.GetGameState(a_t)
             # helpful for measuring frame rate
             print('loop took {} seconds'.format(time.time()-last_time))
             last_time = time.time()
-            x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1)  # 1x20x40x1
+            new_gameImage = new_gameImage.reshape(1, new_gameImage.shape[0], new_gameImage.shape[1], 1)  # 1x20x40x1
             # append the new image to input stack and remove the first one
-            s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3)
+            s_t1 = np.append(new_gameImage, s_t[:, :, :, :3], axis=3)
 
             # store the transition in D
-            D.append((s_t, action_index, r_t, s_t1, isGameOver))
+            D.append((s_t, action_index, new_reward, s_t1, isGameOver))
             if len(D) > model.REPLAY_MEMORY:
                 D.popleft()
 
@@ -182,8 +184,7 @@ class Train:
 
                     inputs[i:i + 1] = state_t
 
-                    targets[i] = tensorModel.predict(
-                        state_t)  # predicted q values
+                    targets[i] = tensorModel.predict(state_t)  # predicted q values
                     # predict q values for next step
                     Q_sa = tensorModel.predict(state_t1)
 
@@ -191,8 +192,7 @@ class Train:
                         # if terminated, only equals reward
                         targets[i, action_t] = reward_t
                     else:
-                        targets[i, action_t] = reward_t + \
-                            model.GAMMA * np.max(Q_sa)
+                        targets[i, action_t] = reward_t + model.GAMMA * np.max(Q_sa)
 
                 loss += tensorModel.train_on_batch(inputs, targets)
                 self.loss_df.loc[len(self.loss_df)] = loss
@@ -228,7 +228,7 @@ class Train:
                 state = "train"
 
             print("TIMESTEP", t, "/ STATE", state,             "/ EPSILON", epsilon, "/ ACTION",
-                  action_index, "/ REWARD", r_t,             "/ Q_MAX ", np.max(Q_sa), "/ Loss ", loss)
+                  action_index, "/ REWARD", new_reward,             "/ Q_MAX ", np.max(Q_sa), "/ Loss ", loss)
 
         print("Episode finished!")
         print("************************")
